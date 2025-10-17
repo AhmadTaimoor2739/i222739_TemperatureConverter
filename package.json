@@ -1,0 +1,12 @@
+{
+  "name": "temperature-converter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [],
+  "author": "i222739 Ahmad Taimoor",
+  "license": "ISC",
+  "description": "Simple Temperature Converter App"
+}
