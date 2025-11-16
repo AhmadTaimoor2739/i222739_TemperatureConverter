@@ -37,10 +37,11 @@ pipeline {
 
         stage('Archive Build Artifact') {
             steps {
-                echo 'Creating build artifact...'
-                bat 'mkdir build_output'
-                bat 'zip -r build_output/app.zip *'
-                archiveArtifacts artifacts: 'build_output/app.zip', fingerprint: true
+                echo "Creating build artifact..."
+                bat """
+                mkdir build_output
+                powershell Compress-Archive -Path * -DestinationPath build_output/app.zip -Force
+                """
             }
         }
     }
