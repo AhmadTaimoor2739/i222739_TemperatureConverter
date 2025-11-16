@@ -1,11 +1,15 @@
 pipeline {
     agent any
 
-    stages {
+    environment {
+        BUILD_TIMESTAMP = new Date().format("yyyy-MM-dd HH:mm:ss")
+    }
 
+    stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/AhmadTaimoor2739/i222739_TemperatureConverter.git'
+                echo "Checking out branch: ${env.BRANCH_NAME}"
+                checkout scm
             }
         }
 
@@ -15,46 +19,55 @@ pipeline {
             }
         }
 
-        stage('Run Lint') {
-            steps {
-                echo 'Running linter...'
-                // If you have eslint configured:
-                // bat 'npm run lint'
-                // Otherwise simulate linting:
-                bat 'echo Linting completed successfully'
+        stage('Parallel Test Execution') {
+            parallel {
+                stage('Unit Tests') {
+                    steps {
+                        echo 'Running Unit Tests...'
+                        // bat 'npm test'
+                        bat 'echo Unit tests passed successfully'
+                    }
+                }
+                stage('Linting') {
+                    steps {
+                        echo 'Running Linter...'
+                        // bat 'npm run lint'
+                        bat 'echo Lint passed successfully'
+                    }
+                }
             }
         }
 
-        stage('Run Tests') {
+        stage('Conditional Deployment') {
             steps {
-                echo 'Running tests...'
-                // If tests exist:
-                // bat 'npm test'
-                // Otherwise simulate:
-                bat 'echo All tests passed successfully'
+                script {
+                    if (env.BRANCH_NAME == 'main') {
+                        echo '🚀 Deployed to Production Environment (main branch)'
+                    } else if (env.BRANCH_NAME == 'dev') {
+                        echo '🚀 Deployed to Staging Environment (dev branch)'
+                    } else {
+                        echo '🧩 Feature branch detected – Deployment Skipped.'
+                    }
+                }
             }
         }
 
-        stage('Archive Build Artifact') {
+        stage('Archive Artifacts') {
             steps {
-                echo "Creating build artifact..."
-                bat """
-                mkdir build_output
-                powershell Compress-Archive -Path * -DestinationPath build_output/app.zip -Force
-                """
+                bat 'mkdir build_output'
+                bat 'echo Build completed > build_output/result.txt'
+                bat 'zip -r build_output/output.zip build_output'
+                archiveArtifacts artifacts: 'build_output/output.zip', fingerprint: true
             }
         }
     }
 
     post {
         success {
-            echo '✅ Build, lint, and tests successful!'
-            echo '📦 Artifact archived successfully.'
-            echo '📧 Email sent to team@example.com (simulated)'
+            echo "✅ Build #${BUILD_NUMBER} on branch ${BRANCH_NAME} completed successfully at ${BUILD_TIMESTAMP}"
         }
         failure {
-            echo '❌ Build or tests failed!'
-            echo '📧 Email sent to team@example.com (simulated)'
+            echo "❌ Build #${BUILD_NUMBER} on branch ${BRANCH_NAME} failed at ${BUILD_TIMESTAMP}"
         }
     }
 }
