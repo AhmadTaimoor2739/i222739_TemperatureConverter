@@ -56,7 +56,7 @@ pipeline {
             steps {
                 bat 'mkdir build_output'
                 bat 'echo Build completed > build_output/result.txt'
-                bat 'zip -r build_output/output.zip build_output'
+                bat 'powershell Compress-Archive -Path * -DestinationPath build_output/app.zip'
                 archiveArtifacts artifacts: 'build_output/output.zip', fingerprint: true
             }
         }
